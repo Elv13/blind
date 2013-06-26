@@ -1,14 +1,10 @@
 local capi =  {timer=timer,client=client}
 local awful      = require( "awful"          )
 local color      = require( "gears.color"    )
-local surface    = require( "gears.surface"  )
 local cairo      = require( "lgi"            ).cairo
-local tag        = require( "awful.tag"      )
 local client     = require( "awful.client"   )
 local themeutils = require( "blind.common.drawing"    )
-local wibox_w    = require( "wibox.widget"   )
 local radical    = require( "radical"        )
-local debug      = debug
 
 local module = {}
 
@@ -150,7 +146,7 @@ local function gen_task_bg_real(wdg,width,args)
     end
 
     if not args.no_marker then
-        add_status_indicator(composed,c,image,width)
+        add_status_indicator(composed,c,image,width,offset)
     end
     composed[#composed+1] = {layer = arr,y=0,x=width-module.theme.default_height/2+1}
     img2 = themeutils.compose(composed)
