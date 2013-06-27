@@ -5,6 +5,7 @@ local cairo      = require( "lgi"            ).cairo
 local client     = require( "awful.client"   )
 local themeutils = require( "blind.common.drawing"    )
 local radical    = require( "radical"        )
+local wibox      = require( "wibox" )
 
 local module = {}
 
@@ -185,11 +186,10 @@ function module.task_widget_draw(self,w, cr, width, height,args)
         cr:set_source(color(awful.util.color_strip_alpha(module.theme.fg_normal)))
     end
 
-    local extents = cr:text_extents(self.data.c.name)
-
+    local ex = self._layout:get_pixel_extents()
     local x_offset = module.theme.default_height/2 + (self.data.c.icon and module.theme.default_height + 12 or 6)
 
-    if width-x_offset-height/2 -4 < extents.width then
+    if width-x_offset-height/2 -4 < ex.width then
         local rad = height/11
         for i=0,2 do
             cr:arc(width-height/2 -2 - i*3*rad,height/2 + rad/2,rad,0,2*math.pi)
@@ -198,11 +198,11 @@ function module.task_widget_draw(self,w, cr, width, height,args)
         cr:rectangle(x_offset,0,width-x_offset-height/2 - 1 - 9*rad,height)
         cr:clip()
     end
-    cr:move_to(x_offset, extents.height + (height - extents.height)/2 - 1)
+    cr:move_to(x_offset, height - (height-ex.height)/2 -1)
     local prefix = ""
     cr:show_text(prefix..(self.data.c.name or "N/A"))
 
-    if width-x_offset-height/2 -4 < extents.width then
+    if width-x_offset-height/2 -4 < ex.width then
         cr:reset_clip()
     end
 end
