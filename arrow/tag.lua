@@ -106,11 +106,7 @@ function module.gen_tag_bg(wdg,t,m,objects,idx,image)
     -- Apply a color/gradient on top of the icon
     local icon = tag.geticon(t) or module.theme.path .."Icon/tags_invert/other.png"
     if icon and module.theme.monochrome_icons then
-        icon = surface(icon)
-        local cr4 = cairo.Context(icon)
-        cr4:set_source(col)
-        cr4:set_operator(cairo.Operator.IN)
-        cr4:paint()
+        themeutils.apply_color_mask(icon,col)
     end
 
     img2 = themeutils.compose({
