@@ -141,7 +141,7 @@ end
 function module.apply_color_mask(img,mask)
     img = surface(img)
     local cr = cairo.Context(img)
-    cr:set_source(color(mask or beautiful.fg_normal))
+    cr:set_source(color(mask or beautiful.icon_grad or beautiful.fg_normal))
     cr:set_operator(cairo.Operator.IN)
     cr:paint()
     return img
