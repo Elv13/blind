@@ -96,7 +96,7 @@ theme.bg_image_focus                   = function(wdg,m,t,objects) return arrow.
 theme.bg_image_urgent                  = function(wdg,m,t,objects) return arrow.task.gen_task_bg(wdg,m,t,objects,theme.taglist_bg_image_urgent)     end
 theme.bg_image_minimize                = function(wdg,m,t,objects) return arrow.task.gen_task_bg(wdg,m,t,objects,nil)     end
 theme.tasklist_disable_icon            = true
-
+theme.monochrome_icons                 = true
 
 
 ------------------------------------------------------------------------------------------------------
