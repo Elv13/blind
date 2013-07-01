@@ -135,16 +135,18 @@ local function gen_task_bg_real(wdg,width,args)
     end
 
     local composed,offset  = {img2,arr1},60
-    if not icon_cache[c.icon] then
-        icon_cache[c.icon] = {}
-    end
-    if c.icon and not icon_cache[c.icon][(c.urgent and "u" or "") .. ((capi.client.focus == c) and "f" or "")] then
-        --Cache
-        icon_cache[c.icon][(c.urgent and "u" or "") .. ((capi.client.focus == c) and "f" or "")] = apply_icon_transformations(c)
-    end
-
     if c.icon then
-       composed[#composed+1] = {layer = icon_cache[c.icon][(c.urgent and "u" or "") .. ((capi.client.focus == c) and "f" or "")] ,y=2,x=height/2 + 6}
+        if not icon_cache[c.icon] then
+            icon_cache[c.icon] = {}
+        end
+        if c.icon and not icon_cache[c.icon][(c.urgent and "u" or "") .. ((capi.client.focus == c) and "f" or "")] then
+            --Cache
+            icon_cache[c.icon][(c.urgent and "u" or "") .. ((capi.client.focus == c) and "f" or "")] = apply_icon_transformations(c)
+        end
+
+        if c.icon then
+            composed[#composed+1] = {layer = icon_cache[c.icon][(c.urgent and "u" or "") .. ((capi.client.focus == c) and "f" or "")] ,y=2,x=height/2 + 6}
+        end
     end
 
     if not args.no_marker then
@@ -200,9 +202,10 @@ function module.task_widget_draw(self,w, cr, width, height,args)
         cr:rectangle(x_offset,0,width-x_offset-height/2 - 1 - 9*rad,height)
         cr:clip()
     end
-    cr:move_to(x_offset, height - (height-ex.height)/2 -1)
-    local prefix = ""
-    cr:show_text(prefix..(self.data.c.name or "N/A"))
+    cr:move_to(x_offset, (height-ex.height)/2 -2)
+--     local prefix = ""
+    cr:show_layout(self._layout)
+--     cr:show_text(prefix..(self.data.c.name or "N/A"))
 
     if width-x_offset-height/2 -4 < ex.width then
         cr:reset_clip()
