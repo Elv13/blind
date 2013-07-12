@@ -33,7 +33,7 @@ theme.bg_minimize    = "#040A1A"
 theme.bg_highlight   = "#0E2051"
 theme.bg_alternate   = "#12232B"
 
-theme.fg_normal      = "#51769C"
+theme.fg_normal      = "#5E8AB6"
 theme.fg_focus       = "#D6E3F3"
 theme.fg_urgent      = "#FF7777"
 theme.fg_minimize    = "#1577D3"
@@ -48,6 +48,8 @@ theme.border_width2  = "2"
 theme.border_normal  = "#555555"
 theme.border_focus   = "#535d6c"
 theme.border_marked  = "#91231c"
+theme.enable_glow    = true
+theme.glow_color     = "#105A8B"
 
 theme.tasklist_floating_icon       = path .."Icon/titlebar/floating.png"
 theme.tasklist_ontop_icon          = path .."Icon/titlebar/ontop.png"

@@ -71,6 +71,12 @@ function module.gen_tag_bg(wdg,t,m,objects,idx,image)
         arr_last_tag = themeutils.get_end_arrow2({ bg_color=module.theme.bg_alternate })
         arr1_tag     = themeutils.get_beg_arrow2({ fg_color=module.theme.bg_normal    })
     end
+    
+    wdg.draw = function(self,w, cr, width, height,args)
+        local ink, logical = self._layout:get_pixel_extents()
+        themeutils.draw_text(cr,self._layout,x_offset,(height-logical.height)/2 - ink.y/4,module.theme.enable_glow or false,module.theme.glow_color)
+    end
+    
     local width = wdg:fit(-1, -1)
     if (awful.tag.getproperty(t,"urgent") or 0) > 0 and not t.selected then
         image = module.theme.taglist_bg_image_urgent

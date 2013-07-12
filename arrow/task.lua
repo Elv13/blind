@@ -19,15 +19,15 @@ local function apply_icon_transformations(c)
     local ic = cairo.Surface(c.icon)
     local icp = cairo.Pattern.create_for_surface(ic)
     local sw,sh = ic:get_width(),ic:get_height()
-
+    local height = module.theme.default_height
     -- Create matrix
-    local ratio = (module.theme.default_height-2) / ((sw > sh) and sw or sh)
+    local ratio = (height-2) / ((sw > sh) and sw or sh)
     local matrix = cairo.Matrix()
     cairo.Matrix.init_scale(matrix,ratio,ratio)
-    matrix:translate(module.theme.default_height/2 - 6,-2)
+    matrix:translate(height/2 - 6,-2)
 
     --Copy to surface
-    local img5 = cairo.ImageSurface.create(cairo.Format.ARGB32, sw, sh)
+    local img5 = cairo.ImageSurface.create(cairo.Format.ARGB32, height, height)
     local cr5 = cairo.Context(img5)
     cr5:set_operator(cairo.Operator.CREAR)
     cr5:paint()
@@ -37,7 +37,7 @@ local function apply_icon_transformations(c)
     cr5:paint()
 
     --Generate the mask
-    local img4 = cairo.ImageSurface.create(cairo.Format.A8, sw, sh)
+    local img4 = cairo.ImageSurface.create(cairo.Format.A8, height, height)
     local cr4 = cairo.Context(img4)
     --cr4:set_matrix(matrix)
     cr4:set_source(icp)
@@ -201,10 +201,7 @@ function module.task_widget_draw(self,w, cr, width, height,args)
         cr:rectangle(x_offset,0,width-x_offset-height/2 - 1 - 9*rad,height)
         cr:clip()
     end
-    cr:move_to(x_offset, (height-logical.height)/2 - ink.y/4)
---     local prefix = ""
-    cr:show_layout(self._layout)
---     cr:show_text(prefix..(self.data.c.name or "N/A"))
+    themeutils.draw_text(cr,self._layout,x_offset,(height-logical.height)/2 - ink.y/4,module.theme.enable_glow or false,module.theme.glow_color)
 
     if width-x_offset-height/2 -4 < logical.width then
         cr:reset_clip()

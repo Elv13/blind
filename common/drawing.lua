@@ -145,7 +145,7 @@ function module.apply_color_mask(img,mask)
     local cr = cairo.Context(img)
     cr:set_source(color(mask or beautiful.icon_grad or beautiful.fg_normal))
     cr:set_operator(cairo.Operator.IN)
-    cr:paint("Verdana")
+    cr:paint()
     return img
 end
 
@@ -176,6 +176,23 @@ function module.draw_underlay(text)
     cr:move_to(height/2 + 2,1)
     cr:show_layout(pango_l)
     return img
+end
+
+local line_width,alpha = {1,2,3,5},{"77","55","33","10"}
+function module.draw_text(cr,layout,x,y,enable_shadow,shadow_color)
+    if enable_shadow and shadow_color then
+        cr:save()
+        for i=1,4 do
+            cr:move_to(x, y)
+            cr:set_source(color(shadow_color..alpha[i]))
+            cr:set_line_width(line_width[i])
+            cr:layout_path(layout)
+            cr:stroke()
+        end
+        cr:restore()
+    end
+    cr:move_to(x, y)
+    cr:show_layout(layout)
 end
 
 return setmetatable(module, { })
