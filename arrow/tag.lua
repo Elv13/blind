@@ -5,7 +5,7 @@ local cairo      = require( "lgi"            ).cairo
 local surface    = require( "gears.surface")
 local tag        = require( "awful.tag"      )
 local themeutils = require( "blind.common.drawing"    )
-local print = print
+local print,type = print,type
 
 local module = {}
 
@@ -81,7 +81,8 @@ function module.gen_tag_bg(wdg,t,m,objects,idx,image)
     if (awful.tag.getproperty(t,"urgent") or 0) > 0 and not t.selected then
         image = module.theme.taglist_bg_image_urgent
     end
-    local hash = width..(image or "nil")..(objects[#objects] == t and ";" or "")..idx..(tag.getproperty(t,"clone_of") and "c" or "")
+    local is_fct = type(image) == "function"
+    local hash = width..(is_fct and "fct" or image or "nil")..(objects[#objects] == t and ";" or "")..idx..(tag.getproperty(t,"clone_of") and "c" or "")
     if taglist_cache[t] and taglist_cache[t][hash] then
         if tag.getproperty(t,"clone_of") then
             wdg:set_markup("<span color='#006A1F'>"..t.name.."</span>")
@@ -89,7 +90,8 @@ function module.gen_tag_bg(wdg,t,m,objects,idx,image)
         return taglist_cache[t][hash]
     end
     local isClone = tag.getproperty(t,"clone_of")
-    local img2 = cairo.ImageSurface.create(cairo.Format.ARGB32, width+(19+2*module.theme.default_height)+(isClone and 20 or 0), module.theme.default_height)
+    local real_width = width+(19+2*module.theme.default_height)+(isClone and 20 or 0)
+    local img2 = cairo.ImageSurface.create(cairo.Format.ARGB32, real_width, module.theme.default_height)
     m:set_left(module.theme.default_height+module.theme.default_height+7)
     m:set_right(module.theme.default_height/2+(isClone and 20 or 0))
     local cr = cairo.Context(img2)
@@ -98,6 +100,8 @@ function module.gen_tag_bg(wdg,t,m,objects,idx,image)
         cairo.Pattern.set_extend(pat,cairo.Extend.REPEAT)
         cr:set_source(pat)
         cr:paint()
+    elseif is_fct then
+        image(cr,real_width+20,module.theme.default_height)
     elseif image then
         local pat = cairo.Pattern.create_for_surface(cairo.ImageSurface.create_from_png(image))
         cairo.Pattern.set_extend(pat,cairo.Extend.REPEAT)
