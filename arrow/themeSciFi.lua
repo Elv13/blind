@@ -122,6 +122,10 @@ theme.menu_width                = 130
 theme.menu_border_width         = 2
 theme.border_width              = 1
 theme.border_color              = theme.fg_normal
+theme.menu_fg_normal            = "#ffffff"
+theme.menu_bg_normal = cairo.Pattern.create_for_surface(cairo.ImageSurface.create_from_png(path .."Icon/bg/menu_bg_scifi.png"))
+cairo.Pattern.set_extend(theme.menu_bg_normal,cairo.Extend.REPEAT)
+print(cairo.Pattern:is_type_of(theme.menu_bg_normal))
 theme.wallpaper = "/home/lepagee/bg/final/bin_ascii_ds.png"
 
 
@@ -202,6 +206,10 @@ theme.layout_tiletop_s       = path .."Icon/layouts_small/tiletop.png"
 theme.layout_spiral_s        = path .."Icon/layouts_small/spiral.png"
 theme.layout_spiraldwindle_s = path .."Icon/layouts_small/spiral_d.png"
 
+wibox_w.textbox.draw = function(self,w, cr, width, height,args)
+    local ink, logical = self._layout:get_pixel_extents()
+    themeutils.draw_text(cr,self._layout,x_offset,(height-logical.height)/2 - ink.y/4,theme.enable_glow or false,theme.glow_color)
+end
 
 return theme
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:encoding=utf-8:textwidth=80
