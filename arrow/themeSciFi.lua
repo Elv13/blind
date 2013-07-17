@@ -126,13 +126,10 @@ theme.menu_border_width         = 2
 theme.border_width              = 1
 theme.border_color              = theme.fg_normal
 theme.menu_fg_normal            = "#ffffff"
-theme.menu_bg_focus             = cairo.Pattern.create_for_surface(cairo.ImageSurface.create_from_png(path .."Icon/bg/menu_bg_focus_scifi.png"))
-cairo.Pattern.set_extend(theme.menu_bg_focus,cairo.Extend.REPEAT)
-theme.menu_bg_normal = cairo.Pattern.create_for_surface(cairo.ImageSurface.create_from_png(path .."Icon/bg/menu_bg_scifi.png"))
-cairo.Pattern.set_extend(theme.menu_bg_normal,cairo.Extend.REPEAT)
-theme.menu_bg_highlight = cairo.Pattern.create_for_surface(cairo.ImageSurface.create_from_png(path .."Icon/bg/menu_bg_highlight.png"))
-cairo.Pattern.set_extend(theme.menu_bg_highlight,cairo.Extend.REPEAT)
-
+theme.menu_bg_focus             = themeutils.pattern(path .."Icon/bg/menu_bg_focus_scifi.png")
+theme.menu_bg_normal            = themeutils.pattern(path .."Icon/bg/menu_bg_scifi.png"      )
+theme.menu_bg_highlight         = themeutils.pattern(path .."Icon/bg/menu_bg_highlight.png"  )
+theme.bg_dock                   = themeutils.pattern(path .."Icon/bg/bg_dock.png"            )
 
 theme.wallpaper = "/home/lepagee/bg/final/bin_ascii_ds.png"
 theme.draw_underlay = themeutils.draw_underlay
