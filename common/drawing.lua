@@ -31,21 +31,33 @@ local end_cache = {}
 module.get_end_arrow2 = function(args)--bg_color,fg_color,padding,direction
     local args = args or {}
     local default_height = beautiful.default_height or 16
-    local hash = (args.width or default_height+1)..(args.padding or 0)..(args.height or default_height)..(args.bg_color or beautiful.fg_normal or "")..(args.direction or "")
+    local bgt = type(args.bg_color)
+    local hash = (args.width or default_height+1)..(args.padding or 0)..(args.height or default_height)..(not args.bg_color and beautiful.fg_normal or (bgt == "string" and args.bg_color or args.bg_color.stops[1][2])  or "")..(args.direction or "")
     if end_cache[hash] then
         return end_cache[hash]
     end
-    local img = cairo.ImageSurface(cairo.Format.ARGB32, (args.width or default_height/2+1)+(args.padding or 0), args.height or default_height)
+    local width,height = (args.width or default_height/2+1)+(args.padding or 0),args.height or default_height
+    local img = cairo.ImageSurface(cairo.Format.ARGB32, width, height)
     local cr = cairo.Context(img)
-    cr:move_to(0,0)
     cr:set_source(color(args.bg_color or beautiful.bg_normal))
-    cr:set_antialias(cairo.ANTIALIAS_NONE)
-    for i=0,(default_height/2+1) do
-        cr:rectangle((args.direction == "left") and 0 or i+1, i               , default_height/2-i, 1)
-        cr:rectangle((args.direction == "left") and 0 or i+1, default_height-i, default_height/2-i, 1)
+    cr:new_path()
+    if (args.direction == "left") then
+        cr:move_to(0,width)
+        cr:line_to(0,height/2)
+        cr:line_to(width,height)
+        cr:line_to(0,height)
+        cr:line_to(0,0)
+        cr:line_to(width,0)
+    else
+        cr:line_to(width,0)
+        cr:line_to(width,height)
+        cr:line_to(0,height)
+        cr:line_to(width,height/2)
+        cr:line_to(0,0)
     end
-    cr:stroke()
-    end_cache[hash] = img
+    cr:close_path()
+--     cr:set_antialias(cairo.ANTIALIAS_NONE)
+    cr:fill()
     return img
 end
 
@@ -59,19 +71,27 @@ local beg_cache = {}
 module.get_beg_arrow2 = function(args)--bg_color,fg_color,padding,direction
     local args = args or {}
     local default_height = beautiful.default_height or 16
-    local hash = (args.width or default_height/2 + 1)..(args.padding or 0)..(args.height or default_height)..(args.bg_color or beautiful.fg_normal or "")..(args.direction or "")
+    local bgt = type(args.bg_color)
+    local hash = (args.width or default_height/2 + 1)..(args.padding or 0)..(args.height or default_height)..(not args.bg_color and beautiful.fg_normal or (bgt == "string" and args.bg_color or args.bg_color.stops[1][2]) or "")..(args.direction or "")
     if beg_cache[hash] then
         return beg_cache[hash]
     end
-    local img = cairo.ImageSurface(cairo.Format.ARGB32, (args.width or default_height/2)+(args.padding or 0), args.height or default_height)
+    local width,height = (args.width or default_height/2+1)+(args.padding or 0),args.height or default_height
+    local img = cairo.ImageSurface(cairo.Format.ARGB32, width, height)
     local cr = cairo.Context(img)
-    cr:move_to(0,0)
     cr:set_source(color(args.bg_color or beautiful.fg_normal))
-    cr:set_antialias(cairo.ANTIALIAS_NONE)
-    for i=0,(default_height/2) do
-        cr:rectangle((args.direction == "left") and default_height/2-i+(args.padding or 0) or 0, i   , i, 1)
-        cr:rectangle((args.direction == "left") and default_height/2-i+(args.padding or 0) or 0, default_height-i, i, 1)
+    cr:new_path()
+    if (args.direction == "left") then
+        cr:move_to(0,width)
+        cr:line_to(0,height/2)
+        cr:line_to(width,height)
+        cr:line_to(width,0)
+    else
+        cr:line_to(width,height/2)
+        cr:line_to(0,height)
+        cr:line_to(0,0)
     end
+    cr:close_path()
     cr:fill()
     beg_cache[hash] = img
     return img

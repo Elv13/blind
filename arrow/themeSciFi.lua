@@ -35,7 +35,7 @@ theme.bg_highlight   = "#0E2051"
 theme.bg_alternate   = "#081B37"
 
 theme.fg_normal      = "#6DA1D4"
-theme.fg_focus       = "#D6E3F3"
+theme.fg_focus       = "#ABCCEA"
 theme.fg_urgent      = "#FF7777"
 theme.fg_minimize    = "#1577D3"
 
@@ -62,7 +62,7 @@ theme.tasklist_ontop_focus_icon    = path .."Icon/titlebar/ontop_focus.png"
 theme.tasklist_sticky_focus_icon   = path .."Icon/titlebar/sticky_focus.png"
 theme.tasklist_plain_task_name     = true
 
-theme.icon_grad = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#7FD0EF" }, { 1, "#4273EF" }}}
+theme.icon_grad = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#8AC2D5" }, { 1, "#3D619C" }}}
 
 
 ------------------------------------------------------------------------------------------------------
