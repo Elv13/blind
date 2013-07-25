@@ -111,13 +111,13 @@ function module.gen_tag_bg(wdg,t,m,objects,idx,image)
     cr:set_source(color(module.theme.icon_grad or module.theme.fg_normal))
     cr:rectangle(0,0,module.theme.default_height+module.theme.default_height/2+5,module.theme.default_height)
     cr:fill()
-    local col = color(module.theme.bg_normal)
+    local col = color(module.theme.icon_grad_invert or module.theme.bg_normal)
     cr:set_source(col)
 
     -- Apply a color/gradient on top of the icon
     local icon = tag.geticon(t) or module.theme.path .."Icon/tags_invert/other.png"
     if icon and module.theme.monochrome_icons then
-        themeutils.apply_color_mask(icon,col)
+        icon=themeutils.apply_color_mask(icon,col)
     end
 
     img2 = themeutils.compose({

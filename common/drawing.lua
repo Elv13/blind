@@ -52,7 +52,7 @@ module.get_end_arrow2 = function(args)--bg_color,fg_color,padding,direction
         cr:line_to(width,0)
         cr:line_to(width,height)
         cr:line_to(0,height)
-        cr:line_to(width,height/2)
+        cr:line_to(width-1,height/2)
         cr:line_to(0,0)
     end
     cr:close_path()
@@ -219,6 +219,9 @@ function module.status_ellipse(cr,width,height)
     cr:save()
     cr:set_source(color({ type = "radial", from = { width/2,0, 0 }, to = { width/2, -10, width/5 }, stops = { { 0, "#1960EF" }, { 1, "#00000000" }}}))
     cr:rectangle(0,0,width,height)
+    cr:fill()
+    cr:set_source(color({ type = "linear", from = { 0, 0 }, to = { 0, 7 }, stops = { { 0, "#0c2e72dd" }, { 1, "#00000000" }}}))
+    cr:rectangle(0,0,width,7)
     cr:fill()
     cr:restore()
 end

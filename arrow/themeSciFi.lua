@@ -62,7 +62,8 @@ theme.tasklist_ontop_focus_icon    = path .."Icon/titlebar/ontop_focus.png"
 theme.tasklist_sticky_focus_icon   = path .."Icon/titlebar/sticky_focus.png"
 theme.tasklist_plain_task_name     = true
 
-theme.icon_grad = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#8AC2D5" }, { 1, "#3D619C" }}}
+theme.icon_grad        = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#8AC2D5" }, { 1, "#3D619C" }}}
+theme.icon_grad_invert = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#000000" }, { 1, "#112543" }}}
 
 
 ------------------------------------------------------------------------------------------------------
