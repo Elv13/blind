@@ -127,10 +127,11 @@ theme.menu_border_width         = 2
 theme.border_width              = 1
 theme.border_color              = theme.fg_normal
 theme.menu_fg_normal            = "#ffffff"
-theme.menu_bg_focus             = themeutils.pattern(path .."Icon/bg/menu_bg_focus_scifi.png")
-theme.menu_bg_normal            = themeutils.pattern(path .."Icon/bg/menu_bg_scifi.png"      )
-theme.menu_bg_highlight         = themeutils.pattern(path .."Icon/bg/menu_bg_highlight.png"  )
-theme.bg_dock                   = themeutils.pattern(path .."Icon/bg/bg_dock.png"            )
+theme.menu_bg_focus             = themeutils.pattern(path .."Icon/bg/menu_bg_focus_scifi.png" )
+theme.menu_bg_header            = themeutils.pattern(path .."Icon/bg/menu_bg_header_scifi.png")
+theme.menu_bg_normal            = themeutils.pattern(path .."Icon/bg/menu_bg_scifi.png"       )
+theme.menu_bg_highlight         = themeutils.pattern(path .."Icon/bg/menu_bg_highlight.png"   )
+theme.bg_dock                   = themeutils.pattern(path .."Icon/bg/bg_dock.png"             )
 
 theme.wallpaper = "/home/lepagee/bg/final/bin_ascii_ds.png"
 theme.draw_underlay = themeutils.draw_underlay
@@ -221,6 +222,7 @@ wibox_w.textbox.draw = function(self,w, cr, width, height,args)
         self:connect_signal("widget::updated",function()
             if self._layout.text ~= self.cached_text then
                 self.cache = {}
+                self.cached_text = self._layout.text
             end
         end)
     end

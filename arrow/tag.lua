@@ -68,8 +68,15 @@ local arr1_tag     = nil
 function module.gen_tag_bg(wdg,t,m,objects,idx,image)
     if not arr_tag then
         arr_tag      = themeutils.get_end_arrow2({ bg_color=module.theme.icon_grad or module.theme.fg_normal    })
-        arr_last_tag = themeutils.get_end_arrow2({ bg_color=module.theme.bg_alternate })
+        arr_last_tag = themeutils.get_end_arrow2({ bg_color=module.theme.bg_alternate,padding=4 })
         arr1_tag     = themeutils.get_beg_arrow2({ bg_color=module.theme.icon_grad or module.theme.bg_normal    })
+        local cr = cairo.Context(arr_last_tag)
+        cr:set_source(color(module.theme.icon_grad or module.theme.fg_normal))
+        cr:set_line_width(1.5)
+        cr:move_to(0,-2)
+        cr:line_to(module.theme.default_height/2,module.theme.default_height/2)
+        cr:line_to(0,module.theme.default_height+2)
+        cr:stroke()
     end
     
     wdg.draw = function(self,w, cr, width, height,args)
@@ -89,11 +96,12 @@ function module.gen_tag_bg(wdg,t,m,objects,idx,image)
         end
         return taglist_cache[t][hash]
     end
+    local isLast = objects[#objects] == t
     local isClone = tag.getproperty(t,"clone_of")
-    local real_width = width+(19+2*module.theme.default_height)+(isClone and 20 or 0)
+    local real_width = width+(19+2*module.theme.default_height)+(isClone and 20 or 0) + (isLast and 4 or 0)
     local img2 = cairo.ImageSurface.create(cairo.Format.ARGB32, real_width, module.theme.default_height)
     m:set_left(module.theme.default_height+module.theme.default_height+7)
-    m:set_right(module.theme.default_height/2+(isClone and 20 or 0))
+    m:set_right(module.theme.default_height/2+(isClone and 20 or 0)+ (isLast and 8 or 0))
     local cr = cairo.Context(img2)
     if isClone then
         local pat = cairo.Pattern.create_for_surface(cairo.ImageSurface.create_from_png(module.theme.taglist_bg_image_remote_used))
@@ -124,7 +132,7 @@ function module.gen_tag_bg(wdg,t,m,objects,idx,image)
         img2,
         {layer=icon,x=2,y=1--[["align"]],scale=true,height=module.theme.default_height+2},
         {layer=arr1_tag,x=module.theme.default_height+module.theme.default_height/2+5,y=0},
-        {layer = objects[#objects] ~= t and arr_tag or arr_last_tag,y=0,x=width+ (module.theme.default_height+3*(module.theme.default_height/2)+11) - module.theme.default_height/2 + 5 -9+(isClone and 20 or 0)},
+        {layer = (not isLast) and arr_tag or arr_last_tag,y=0,x=width+ (module.theme.default_height+3*(module.theme.default_height/2)+11) - module.theme.default_height/2 + 5 -9+(isClone and 20 or 0)+(isLast and 5 or 0)},
         isClone and {layer=module.theme.path .."Icon/clone2.png",x=width+42} or nil,
         isClone and {layer = gen_screen_nb(tag.getscreen(isClone)),x=width+42} or nil
     })
