@@ -69,7 +69,7 @@ function module.gen_tag_bg(wdg,t,m,objects,idx,image)
     if not arr_tag then
         arr_tag      = themeutils.get_end_arrow2({ bg_color=module.theme.icon_grad or module.theme.fg_normal    })
         arr_last_tag = themeutils.get_end_arrow2({ bg_color=module.theme.bg_alternate,padding=4 })
-        arr1_tag     = themeutils.get_beg_arrow2({ bg_color=module.theme.icon_grad or module.theme.bg_normal    })
+        arr1_tag     = themeutils.get_beg_arrow2({ bg_color=module.theme.icon_grad or module.theme.fg_normal    })
         local cr = cairo.Context(arr_last_tag)
         cr:set_source(color(module.theme.icon_grad or module.theme.fg_normal))
         cr:set_line_width(1.5)

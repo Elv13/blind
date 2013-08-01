@@ -15,6 +15,10 @@ they are totally hidden from the user point of view.
 A dark theme with light text, blue glow and 45 degree patterns.
 [![SciFi theme](https://raw.github.com/Elv13/blind/master/screenshot/scifi_small.png)](https://raw.github.com/Elv13/blind/master/screenshot/scifi.png)
 
+### Blue
+Do you like blue? I do!
+[![Green theme](https://raw.github.com/Elv13/blind/master/screenshot/blue_small.png)](https://raw.github.com/Elv13/blind/master/screenshot/blue.png)
+
 ### Green
 A midnight terminal like terminal for 80s nostagic
 [![Green theme](https://raw.github.com/Elv13/blind/master/screenshot/green_small.png)](https://raw.github.com/Elv13/blind/master/screenshot/green.png)
