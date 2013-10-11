@@ -24,7 +24,7 @@ arrow.task.theme,arrow.tag.theme = theme,theme
 ------------------------------------------------------------------------------------------------------
 
 theme.default_height = 16
-theme.font           = "ohsnap 8"
+-- theme.font           = "ohsnap 8"
 theme.path           = path
 
 theme.bg_normal      = "#000000"
@@ -33,6 +33,7 @@ theme.bg_urgent      = "#5B0000"
 theme.bg_minimize    = "#040A1A"
 theme.bg_highlight   = "#0E2051"
 theme.bg_alternate   = "#081B37"
+theme.bg_allinone    = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#1D4164" }, { 1, "#0D2144" }}}
 
 theme.fg_normal      = "#6DA1D4"
 theme.fg_focus       = "#ABCCEA"
@@ -48,7 +49,7 @@ theme.bg_systray     = theme.fg_normal
 
 theme.border_width   = "0"
 theme.border_width2  = "2"
-theme.border_normal  = "#555555"
+theme.border_normal  = "#1F1F1F"
 theme.border_focus   = "#535d6c"
 theme.border_marked  = "#91231c"
 theme.enable_glow    = true
@@ -88,9 +89,10 @@ theme.icon_grad_invert = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, sto
 ------------------------------------------------------------------------------------------------------
 
 -- Display the taglist squares
+theme.taglist_underline                = "#094CA5"
 theme.taglist_bg_image_empty           = nil
-theme.taglist_bg_image_selected        = path .."Icon/bg/selected_bg_scifi.png"
-theme.taglist_bg_image_focus           = path .."Icon/bg/selected_bg_scifi.png"
+theme.taglist_bg_image_selected        = path .."Icon/bg/selected_bg_scifi_focus.png"
+theme.taglist_bg_image_focus           = path .."Icon/bg/selected_bg_scifi_focus.png"
 theme.taglist_bg_image_used            = path .."Icon/bg/selected_bg_scifi.png"
 theme.taglist_bg_image_urgent          = path .."Icon/bg/urgent_bg.png"
 theme.taglist_bg_image_remote_selected = path .."Icon/bg/selected_bg_green.png"
@@ -100,6 +102,7 @@ theme.taglist_squares_sel              = function(wdg,m,t,objects,idx) return ar
 theme.taglist_squares_sel_empty        = function(wdg,m,t,objects,idx) return arrow.tag.gen_tag_bg(wdg,m,t,objects,idx,theme.taglist_bg_image_selected) end
 theme.taglist_squares_unsel_empty      = function(wdg,m,t,objects,idx) return arrow.tag.gen_tag_bg(wdg,m,t,objects,idx,nil)     end
 theme.taglist_disable_icon             = true
+theme.tasklist_bg_image_selected       = path .."Icon/bg/selected_bg_scifi.png"
 theme.bg_image_normal                  = function(wdg,m,t,objects) return arrow.task.gen_task_bg(wdg,m,t,objects,nil)     end
 theme.bg_image_focus                   = function(wdg,m,t,objects) return arrow.task.gen_task_bg(wdg,m,t,objects,theme.taglist_bg_image_selected)     end
 theme.bg_image_urgent                  = function(wdg,m,t,objects) return arrow.task.gen_task_bg(wdg,m,t,objects,theme.taglist_bg_image_urgent)     end
@@ -179,7 +182,7 @@ theme.titlebar_tag    = path .."Icon/titlebar/tag.png"
 theme.titlebar_bg_focus = theme.bg_normal
 
 theme.titlebar_title_align = "left"
-theme.titlebar_height = 16
+theme.titlebar_height = 14
 
 
 ------------------------------------------------------------------------------------------------------
@@ -228,7 +231,7 @@ wibox_w.textbox.draw = function(self,w, cr, width, height,args)
         end)
     end
 
-    local cached = self.cache[width+(10000*height)]
+    local cached = self.cache[(width+(10000*height))..self._layout.text]
     if cached then
         -- Use the cache
         cr:set_source_surface(cached)
@@ -250,7 +253,7 @@ wibox_w.textbox.draw = function(self,w, cr, width, height,args)
     cr2:set_source(cr:get_source())
     cr2:update_layout(self._layout)
     themeutils.draw_text(cr2,self._layout,x_offset,(height-logical.height)/2 - ink.y/4,theme.enable_glow or false,theme.glow_color)
-    self.cache[width+(10000*height)] = img
+    self.cache[width+(10000*height)..self._layout.text] = img
 
     --Use the cache
     cr:set_source_surface(img)

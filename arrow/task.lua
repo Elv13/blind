@@ -10,51 +10,6 @@ local beautiful  = require( "beautiful" )
 
 local module = {}
 
------------------------------------------------------------------------------
---1) Take the client icon                                                  --
---2) Resize and move it                                                    --
---3) Apply a few layers of color effects to desaturate, then tint the icon --
------------------------------------------------------------------------------
-local function apply_icon_transformations(c,col)
-    -- Get size
-    local ic = cairo.Surface(c.icon)
-    local icp = cairo.Pattern.create_for_surface(ic)
-    local sw,sh = ic:get_width(),ic:get_height()
-    local height = beautiful.default_height
-    -- Create matrix
-    local ratio = (height-2) / ((sw > sh) and sw or sh)
-    local matrix = cairo.Matrix()
-    cairo.Matrix.init_scale(matrix,ratio,ratio)
-    matrix:translate(height/2 - 6,-2)
-
-    --Copy to surface
-    local img5 = cairo.ImageSurface.create(cairo.Format.ARGB32, height, height)
-    local cr5 = cairo.Context(img5)
-    cr5:set_operator(cairo.Operator.CREAR)
-    cr5:paint()
-    cr5:set_operator(cairo.Operator.SOURCE)
-    cr5:set_matrix(matrix)
-    cr5:set_source(icp)
-    cr5:paint()
-
-    --Generate the mask
-    local img4 = cairo.ImageSurface.create(cairo.Format.A8, sw, sh)
-    local cr4 = cairo.Context(img4)
-    --cr4:set_matrix(matrix)
-    cr4:set_source(icp)
-    cr4:paint()
-
-    -- Apply desaturation
-    cr5:set_source_rgba(0,0,0,1)
-    cr5:set_operator(cairo.Operator.HSL_SATURATION)
-    cr5:mask(cairo.Pattern.create_for_surface(img4))
-    cr5:set_operator(cairo.Operator.HSL_COLOR)
-    cr5:set_source(col)
-    cr5:mask(cairo.Pattern.create_for_surface(img4))
-    return img5
-end
-
-
 
 
 --------------------------------------------------------------
@@ -131,7 +86,7 @@ local function gen_task_bg_real(wdg,width,args,col,image)
         end
         if c.icon and not icon_cache[c.icon][(c.urgent and "u" or "") .. ((capi.client.focus == c) and "f" or "")] then
             --Cache
-            icon_cache[c.icon][(c.urgent and "u" or "") .. ((capi.client.focus == c) and "f" or "")] = apply_icon_transformations(c,col)
+            icon_cache[c.icon][(c.urgent and "u" or "") .. ((capi.client.focus == c) and "f" or "")] = themeutils.apply_icon_transformations(c.icon,col)
         end
 
         if c.icon then
@@ -162,7 +117,7 @@ function module.task_widget_draw(self,w, cr, width, height,args)
    local col,image = nil,nil
     if capi.client.focus == self.data.c then
         col   = color(awful.util.color_strip_alpha(beautiful.fg_focus))
-        image = beautiful.taglist_bg_image_selected
+        image = beautiful.tasklist_bg_image_selected or beautiful.taglist_bg_image_selected
     elseif self.data.c.urgent then
         col   = color(awful.util.color_strip_alpha(beautiful.fg_urgent))
         image = beautiful.taglist_bg_image_urgent
@@ -182,8 +137,8 @@ function module.task_widget_draw(self,w, cr, width, height,args)
     elseif self._valign == "bottom" then
         offset = height - logical.height
     end
-
-    cr:select_font_face(beautiful.font, cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
+    self._layout:set_font_description(beautiful.get_font(beautiful.font))
+--     cr:select_font_face(beautiful.get_font(beautiful.font), cairo.FontSlant.NORMAL, cairo.FontWeight.NORMAL)
 
     local x_offset = beautiful.default_height/2 + (self.data.c.icon and beautiful.default_height + 12 or 6)
 
@@ -197,7 +152,7 @@ function module.task_widget_draw(self,w, cr, width, height,args)
         cr:clip()
     end
 
-    themeutils.draw_text(cr,self._layout,x_offset,(height-logical.height)/2 - ink.y/4,beautiful.enable_glow or false,beautiful.glow_color)
+    themeutils.draw_text(cr,self._layout,x_offset,(height-logical.height)/2 - ink.y/4,beautiful.enable_glow or false,self.data.c.urgent and "#220000" or beautiful.glow_color)
 
     if width-x_offset-height/2 -4 < logical.width then
         cr:reset_clip()
