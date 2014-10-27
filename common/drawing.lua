@@ -1,32 +1,195 @@
 local setmetatable = setmetatable
-local print        = print
-local tostring = tostring
 local type         = type
-local ipairs       = ipairs
 local math         = math
 local surface      = require("gears.surface")
-local button       = require( "awful.button" )
 local beautiful    = require( "beautiful"    )
-local naughty      = require( "naughty"      )
-local tag          = require( "awful.tag"    )
 local wibox        = require( "wibox"  )
 local color = require("gears.color")
-local gsurface = require("gears.surface")
 local cairo = require("lgi").cairo
 local pango = require("lgi").Pango
 local pangocairo = require("lgi").PangoCairo
-
-local capi = { image  = image  ,
-               widget = widget,
-               screen = screen}
 local module = {}
 
-local cacheE,cacheB = {},{}
+-- Until it is merged into Awesome
 
--- local function move_and_apply(cr,pat,x,y)
---     cr:set_source_surface(surface.load(pat),x or 0,y or 0)
---     cr:paint()
--- end
+if not surface.get_size then
+    --- Get the size of a cairo surface
+    -- @param surf The surface you are interested in
+    -- @return The surface's width and height
+    surface.get_size = function(surf)
+        local cr = cairo.Context(surf)
+        local x, y, w, h = cr:clip_extents()
+        return w, h
+    end
+end
+
+if not color.apply_mask then
+    color.apply_mask = function(img,mask_col)
+        img = surface(img)
+        local cr = cairo.Context(img)
+        cr:set_source(color(mask_col or beautiful.icon_mask or beautiful.fg_normal))
+        cr:set_operator(cairo.Operator.IN)
+        cr:paint()
+        return img
+    end
+
+
+    --- Setup a surface to be transformed
+    -- @return A new surface
+    -- @return a context
+    -- @return the mask surface
+    local function create_transformation_mask(sur,height,width,padding)
+        -- Get size
+        local ic = surface(sur)
+        local icp = cairo.Pattern.create_for_surface(ic)
+        local sw,sh = surface.get_size(ic)
+        local height,width = height or sh,width or sw
+        local padding = padding or 2
+        local main_ratio = (sw > sh) and sw or sh
+        local ratio = (height-padding) / main_ratio
+
+        -- Create matrix
+        local matrix = cairo.Matrix()
+        cairo.Matrix.init_scale(matrix,ratio,ratio)
+        matrix:translate(height/2-6,padding/2)
+
+        --Copy to surface
+        local img = cairo.ImageSurface.create(cairo.Format.ARGB32, width, height)
+        local cr = cairo.Context(img)
+        cr:set_operator(cairo.Operator.CREAR)
+        cr:paint()
+        cr:set_operator(cairo.Operator.SOURCE)
+        cr:set_matrix(matrix)
+        cr:set_source(icp)
+        cr:paint()
+
+        --Generate the mask
+        local mask = ic:create_similar(cairo.Content.ALPHA, sw, sh)
+        local cr4 = cairo.Context(mask)
+        cr4:set_source(icp)
+        cr4:paint()
+
+        return img,cr,mask
+    end
+
+    --- Return a surface where colors have been replaced by a tint
+    -- @param sur A surface or image path
+    -- @param col The tint color
+    -- @param height The height of the resulting surface
+    -- @param width The width of the resulting surface
+    -- @param padding a padding
+    -- @return A new surface
+    function surface.tint(sur,col,height,width,padding)
+        local img,cr,mask= create_transformation_mask(sur,height,width,padding)
+
+        -- Apply the tint
+        cr:set_operator(cairo.Operator.HSL_COLOR)
+        if not color then
+            color = require("gears.color")
+        end
+        cr:set_source(color(col))
+        cr:mask(cairo.Pattern.create_for_surface(mask))
+        return img
+    end
+
+    --- Return a desaturated surface
+    -- @param sur A surface or image path
+    -- @param factor The desaturation strength (0-1)
+    -- @param height The height of the resulting surface
+    -- @param width The width of the resulting surface
+    -- @param padding a padding
+    -- @return A new surface
+    function surface.desaturate(sur,factor,height,width,padding)
+        local img,cr,mask= create_transformation_mask(sur,height,width,padding)
+        local factor = factor or 1
+
+        -- Apply desaturation
+        cr:set_source_rgba(0,0,0,factor)
+        cr:set_operator(cairo.Operator.HSL_SATURATION)
+        cr:mask(cairo.Pattern.create_for_surface(mask))
+
+        return img
+    end
+
+end
+
+--- Compose multiple surfaces as one
+--
+-- Examples:
+--    gears.surface.compose({base_surface,surface2,{layer=other_surface,matrix=matrix},{layer=arr2,x=12}})
+--
+-- Each table element can be a surface, a path or a table with "x","y","layer","matrix" and "scale" as keys.
+-- The matrix are standard cairo matrix
+-- @note Please note that the first layer cannot be a table
+-- @param layer_table An array of surfaces
+-- @return A new composed surface with the same dimensions as layer_table[1]
+function surface.compose(layer_table)
+    local base,cr,base_w,base_h = nil,nil
+    for k=1,#layer_table do --Do NOT use ipairs here as the array have some nils
+        local v = layer_table[k]
+        if not base then
+            base = v
+            if type(v) == "string" then
+                base = cairo.ImageSurface.create_from_png(base)
+                base_w,base_h = surface.get_size(base)
+                cr = cairo.Context(base)
+            else
+                base_w,base_h = surface.get_size(v)
+                base = v:create_similar(cairo.Content.COLOR_ALPHA, base_w,base_h)
+                cr = cairo.Context(base)
+                cr:set_source_surface(v)
+                cr:paint()
+            end
+        elseif v then
+            local s,x,y,matrix,scale,height = v,0,0,nil,false,nil
+            local layer_type=type(s)
+            if layer_type == "table" then
+                x,y,matrix,scale,height = v.x,v.y,v.matrix,v.scale,v.height
+                s = s.layer
+                layer_type = type(s)
+            end
+            if layer_type == "string" then
+                s = cairo.ImageSurface.create_from_png(s)
+            elseif layer_type == "userdata" then
+                s = surface.load(s)
+            end
+
+            if scale then
+                local sw,sh = s:get_width(),s:get_height()
+                local ratio = ((sw > sh) and sw or sh) / ((height or base_h or 16)-4)
+                local matrix2 = cairo.Matrix()
+                cairo.Matrix.init_scale(matrix2,ratio,ratio)
+                if y == "align" then
+                    if base_h > sh then
+                        y = (base_h -sh)/2
+                    else
+                        y = (sh - base_h)/2
+                    end
+                end
+                matrix2:translate(-x,-y)
+                local pattern = cairo.Pattern.create_for_surface(s)
+                pattern:set_matrix(matrix2)
+                cr:set_source(pattern)
+            elseif matrix then
+                local pattern = cairo.Pattern.create_for_surface(s)
+                pattern:set_matrix(matrix)
+                cr:set_source(pattern)
+                cr:move_to(x,y)
+            else
+                cr:set_source_surface(s,x,y)
+            end
+            cr:paint()
+        end
+    end
+    return base
+end
+
+
+
+
+
+
+-- Old stuff [DEPRECATED]
 
 local end_cache = {}
 module.get_end_arrow2 = function(args)--bg_color,fg_color,padding,direction
@@ -106,98 +269,36 @@ module.get_beg_arrow_wdg2 = function(args)
 end
 
 --Take multiple layers or path_to_png and add them on top of each other
-module.compose = function(layer_array)
-    local base,cr,base_w,base_h = nil,nil
-    for k=1,#layer_array do --Do NOT use ipairs here as the array have some nils
-        local v = layer_array[k]
-        if not base then
-            base = v
-            if type(base) == "string" then
-                base = cairo.ImageSurface.create_from_png(base)
-            end
-            cr = cairo.Context(base)
-            base_w,base_h = base:get_width(),base:get_height()
-        elseif v then
-            local s,x,y,matrix,scale,height = v,0,0,nil,false,nil
-            local layer_type=type(s)
-            if layer_type == "table" then
-                x,y,matrix,scale,height = v.x,v.y,v.matrix,v.scale,v.height
-                s = s.layer
-                layer_type = type(s)
-            end
-            if layer_type == "string" then
-                s = cairo.ImageSurface.create_from_png(s)
-            elseif layer_type == "userdata" then
-                s = surface.load(s)
-            end
-
-            if scale then
-                local sw,sh = s:get_width(),s:get_height()
-                local ratio = ((sw > sh) and sw or sh) / ((height or beautiful.default_height or 16)-4)
-                local matrix2 = cairo.Matrix()
-                cairo.Matrix.init_scale(matrix2,ratio,ratio)
-                if y == "align" then
-                    if base_h > sh then
-                        y = (base_h -sh)/2
-                    else
-                        y = (sh - base_h)/2
-                    end
-                    print(y,base_h,sh)
-                end
-                matrix2:translate(-x,-y)
-                local pattern = cairo.Pattern.create_for_surface(s)
-                pattern:set_matrix(matrix2)
-                cr:set_source(pattern)
-            elseif matrix then
-                local pattern = cairo.Pattern.create_for_surface(s)
-                pattern:set_matrix(matrix)
-                cr:set_source(pattern)
-                cr:move_to(x,y)
-            else
-                cr:set_source_surface(s,x,y)
-            end
-            cr:paint()
-        end
-    end
-    return base
-end
-
-function module.apply_color_mask(img,mask)
-    img = surface(img)
-    local cr = cairo.Context(img)
-    cr:set_source(color(mask or beautiful.icon_grad or beautiful.fg_normal))
-    cr:set_operator(cairo.Operator.IN)
-    cr:paint()
-    return img
-end
+module.compose = surface.compose
 
 -- Draw information buble intended for menus background
 local pango_l,pango_crx = {},{}
 function module.draw_underlay(text,args)
     local args = args or {}
-    local height = args.height or (beautiful.menu_height-3)
+    local padding = beautiful.default_height/3
+    local height = args.height or (beautiful.menu_height)
     if not pango_l[height] then
         local pango_crx = pangocairo.font_map_get_default():create_context()
         pango_l[height] = pango.Layout.new(pango_crx)
         local desc = pango.FontDescription()
         desc:set_family("Verdana")
         desc:set_weight(pango.Weight.BOLD)
-        desc:set_size((height-8) * pango.SCALE)
+        desc:set_size((height-padding*2) * pango.SCALE)
         pango_l[height]:set_font_description(desc)
     end
     pango_l[height].text = text
-    local width = pango_l[height]:get_pixel_extents().width + height + 4
-    local img = cairo.ImageSurface.create(cairo.Format.ARGB32, width+(args.padding_right or 0), height+4)
+    local width = pango_l[height]:get_pixel_extents().width + height + padding
+    local img = cairo.ImageSurface.create(cairo.Format.ARGB32, width+(args.padding_right or 0), height+padding)
     cr = cairo.Context(img)
     cr:set_source(color(args.bg or beautiful.bg_alternate))
-    cr:arc((height-4)/2 + 2, (height-4)/2 + 2 + (args.margins or 0), (height-4)/2+(args.padding or 0)/2,0,2*math.pi)
+    cr:arc((height-padding)/2 + 2, (height-padding)/2 + padding/4 + (args.margins or 0), (height-padding)/2+(args.padding or 0)/2,0,2*math.pi)
     cr:fill()
-    cr:arc(width - (height-4)/2 - 2, (height-4)/2 + 2 + (args.margins or 0), (height-4)/2+(args.padding or 0)/2,0,2*math.pi)
-    cr:rectangle((height-4)/2+2,2 + (args.margins or 0)-(args.padding or 0)/2,width - (height),(height-4)+(args.padding or 0))
+    cr:arc(width - (height-padding)/2 - 2, (height-padding)/2 + padding/4 + (args.margins or 0), (height-padding)/2+(args.padding or 0)/2,0,2*math.pi)
+    cr:rectangle((height-padding)/2+2,padding/4 + (args.margins or 0)-(args.padding or 0)/2,width - (height),(height-padding)+(args.padding or 0))
     cr:fill()
     cr:set_source(color(args.fg or beautiful.bg_normal))
     cr:set_operator(cairo.Operator.CLEAR)
-    cr:move_to(height/2 + 2,1 + (args.margins or 0)-(args.padding or 0)/2)
+    cr:move_to(height/2 + 2,padding/4 + (args.margins or 0)-(args.padding or 0)/2)
     cr:show_layout(pango_l[height])
     return img
 end
@@ -219,26 +320,6 @@ function module.draw_text(cr,layout,x,y,enable_shadow,shadow_color)
     cr:show_layout(layout)
 end
 
-function module.status_ellipse(cr,width,height)
-    cr:save()
-    cr:set_source(color({ type = "radial", from = { width/2,0, 0 }, to = { width/2, -10, width/5 }, stops = { { 0, "#1960EF" }, { 1, "#00000000" }}}))
-    cr:rectangle(0,0,width,height)
-    cr:fill()
-    cr:set_source(color({ type = "linear", from = { 0, 0 }, to = { 0, 7 }, stops = { { 0, "#0c2e72dd" }, { 1, "#00000000" }}}))
-    cr:rectangle(0,0,width,7)
-    cr:fill()
-    cr:set_source(color(beautiful.taglist_underline or beautiful.bg_alternate))
-    cr:rectangle(2*height+5,height-2,width - 3*height-25,2)
-    cr:fill()
-    cr:restore()
-end
-
-function module.pattern(path)
-    local pat = cairo.Pattern.create_for_surface(cairo.ImageSurface.create_from_png(path))
-    cairo.Pattern.set_extend(pat,cairo.Extend.REPEAT)
-    return pat
-end
-
 local sep_wdgs = nil
 function module.separator_widget()
     if not sep_wdgs then
@@ -256,50 +337,6 @@ function module.separator_widget()
     return sep_wdgs
 end
 
------------------------------------------------------------------------------
---1) Take the client icon                                                  --
---2) Resize and move it                                                    --
---3) Apply a few layers of color effects to desaturate, then tint the icon --
------------------------------------------------------------------------------
-function module.apply_icon_transformations(icon,col)
-    -- Get size
-    local ic = gsurface(icon)
-    local icp = cairo.Pattern.create_for_surface(ic)
-    local sw,sh = ic:get_width(),ic:get_height()
-    local height = beautiful.default_height
-    -- Create matrix
-    local ratio = (height-2) / ((sw > sh) and sw or sh)
-    local matrix = cairo.Matrix()
-    cairo.Matrix.init_scale(matrix,ratio,ratio)
-    matrix:translate(height/2 - 6,-2)
-
-    --Copy to surface
-    local img5 = cairo.ImageSurface.create(cairo.Format.ARGB32, height, height)
-    local cr5 = cairo.Context(img5)
-    cr5:set_operator(cairo.Operator.CREAR)
-    cr5:paint()
-    cr5:set_operator(cairo.Operator.SOURCE)
-    cr5:set_matrix(matrix)
-    cr5:set_source(icp)
-    cr5:paint()
-
-    --Generate the mask
-    local img4 = cairo.ImageSurface.create(cairo.Format.A8, sw, sh)
-    local cr4 = cairo.Context(img4)
-    --cr4:set_matrix(matrix)
-    cr4:set_source(icp)
-    cr4:paint()
-
-    -- Apply desaturation
-    cr5:set_source_rgba(0,0,0,1)
-    cr5:set_operator(cairo.Operator.HSL_SATURATION)
-    cr5:mask(cairo.Pattern.create_for_surface(img4))
-    cr5:set_operator(cairo.Operator.HSL_COLOR)
-    cr5:set_source(col)
-    cr5:mask(cairo.Pattern.create_for_surface(img4))
-    return img5
-end
-
-
+module.apply_icon_transformations = surface.tint
 
 return setmetatable(module, { })
