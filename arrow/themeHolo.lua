@@ -16,7 +16,7 @@ local theme = blind.theme
 ------------------------------------------------------------------------------------------------------
 
 theme.default_height = 20
-theme.font           = "ohsnap 8"
+-- theme.font           = "ohsnap 8"
 theme.font           = "Sans DemiBold 8"
 -- theme.font           = "-*-Terminus sans medium-r-normal--*-30-*-*-*-*-iso10646-1"
 -- theme.font           = "Terminus 8 bold"
@@ -203,7 +203,6 @@ theme.bg_dock                   = color.create_png_pattern(path .."Icon/bg/bg_do
 theme.fg_dock_1                 = "#1889F2"
 theme.fg_dock_2                 = "#0A3E6E"
 
-theme.wallpaper = "/home/lepagee/bg/final/bin_ascii_ds.png"
 theme.draw_underlay = themeutils.draw_underlay
 
 theme.menu = blind {
@@ -229,90 +228,11 @@ theme.menu = blind {
 --                                                                                                  --
 ------------------------------------------------------------------------------------------------------
 
--- You can add as many variables as
--- you wish and access them by using
--- beautiful.variable in your rc.lua
---bg_widget    = #cc0000
+-- Titlebar
+loadfile(theme.path .."bits/titlebar.lua")(theme,path)
 
--- Define the image to load
-
-theme.titlebar = blind {
-    close_button = blind {
-        normal = path .."Icon/titlebar/close_normal_inactive.png",
-        focus = path .."Icon/titlebar/close_focus_inactive.png",
-    },
-
-    ontop_button = blind {
-        normal_inactive = path .."Icon/titlebar/ontop_normal_inactive.png",
-        focus_inactive = path .."Icon/titlebar/ontop_focus_inactive.png",
-        normal_active = path .."Icon/titlebar/ontop_normal_active.png",
-        focus_active = path .."Icon/titlebar/ontop_focus_active.png",
-    },
-
-    sticky_button = blind {
-        normal_inactive = path .."Icon/titlebar/sticky_normal_inactive.png",
-        focus_inactive = path .."Icon/titlebar/sticky_focus_inactive.png",
-        normal_active = path .."Icon/titlebar/sticky_normal_active.png",
-        focus_active = path .."Icon/titlebar/sticky_focus_active.png",
-    },
-
-    floating_button = blind {
-        normal_inactive = path .."Icon/titlebar/floating_normal_inactive.png",
-        focus_inactive = path .."Icon/titlebar/floating_focus_inactive.png",
-        normal_active = path .."Icon/titlebar/floating_normal_active.png",
-        focus_active = path .."Icon/titlebar/floating_focus_active.png",
-    },
-
-    maximized_button = blind {
-        normal_inactive = path .."Icon/titlebar/maximized_normal_inactive.png",
-        focus_inactive = path .."Icon/titlebar/maximized_focus_inactive.png",
-        normal_active = path .."Icon/titlebar/maximized_normal_active.png",
-        focus_active = path .."Icon/titlebar/maximized_focus_active.png",
-    },
-
-    resize      = path .."Icon/titlebar/resize.png",
-    tag         = path .."Icon/titlebar/tag.png",
-    bg_focus    = theme.bg_normal,
-    title_align = "left",
-    height      = 14,
-}
-
-
-------------------------------------------------------------------------------------------------------
---                                                                                                  --
---                                             LAYOUTS                                              --
---                                                                                                  --
-------------------------------------------------------------------------------------------------------
-
-theme.layout = blind {
-    fairh           = path .."Icon/layouts/fairh.png",
-    fairv           = path .."Icon/layouts/fairv.png",
-    floating        = path .."Icon/layouts/floating.png",
-    magnifier       = path .."Icon/layouts/magnifier.png",
-    max             = path .."Icon/layouts/max.png",
-    fullscreen      = path .."Icon/layouts/fullscreen.png",
-    tilebottom      = path .."Icon/layouts/tilebottom.png",
-    tileleft        = path .."Icon/layouts/tileleft.png",
-    tile            = path .."Icon/layouts/tile.png",
-    tiletop         = path .."Icon/layouts/tiletop.png",
-    spiral          = path .."Icon/layouts/spiral.png",
-    spiraldwindle   = path .."Icon/layouts/spiral_d.png",
-
-    small = blind {
-        fairh         = path .."Icon/layouts_small/fairh.png",
-        fairv         = path .."Icon/layouts_small/fairv.png",
-        floating      = path .."Icon/layouts_small/floating.png",
-        magnifier     = path .."Icon/layouts_small/magnifier.png",
-        max           = path .."Icon/layouts_small/max.png",
-        fullscreen    = path .."Icon/layouts_small/fullscreen.png",
-        tilebottom    = path .."Icon/layouts_small/tilebottom.png",
-        tileleft      = path .."Icon/layouts_small/tileleft.png",
-        tile          = path .."Icon/layouts_small/tile.png",
-        tiletop       = path .."Icon/layouts_small/tiletop.png",
-        spiral        = path .."Icon/layouts_small/spiral.png",
-        spiraldwindle = path .."Icon/layouts_small/spiral_d.png",
-    }
-}
+-- Layouts
+loadfile(theme.path .."bits/layout.lua")(theme,path)
 
 require( "chopped.slice" )
 

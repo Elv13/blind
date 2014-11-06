@@ -1,20 +1,19 @@
-local capi =  {timer=timer,client=client}
-local awful      = require( "awful"          )
 local color      = require( "gears.color"    )
 local surface    = require( "gears.surface"  )
+local themeutils = require( "blind.common.drawing"    )
+local blind      = require( "blind"          )
+local radical    = require( "radical"        )
+local debug      = debug
 local cairo      = require( "lgi"            ).cairo
 local pango      = require( "lgi"            ).Pango
-local tag        = require( "awful.tag"      )
-local client     = require( "awful.client"   )
-local themeutils = require( "blind.common.drawing"    )
-local wibox_w    = require( "wibox.widget"   )
-local radical    = require( "radical"        )
 local blind_pat  = require( "blind.common.pattern" )
+local wibox_w    = require( "wibox.widget"   )
 local debug      = debug
 
 local path = debug.getinfo(1,"S").source:gsub("theme.*",""):gsub("@","")
+print(path)
 
-local theme = {}
+local theme = blind.theme
 
 ------------------------------------------------------------------------------------------------------
 --                                                                                                  --
@@ -198,85 +197,11 @@ theme.wallpaper = "/home/lepagee/bg/final/bin_ascii_ds.png"
 theme.draw_underlay = themeutils.draw_underlay
 
 
-------------------------------------------------------------------------------------------------------
---                                                                                                  --
---                                             TITLEBAR                                             --
---                                                                                                  --
-------------------------------------------------------------------------------------------------------
+-- Titlebar
+loadfile(theme.path .."bits/titlebar.lua")(theme,path)
 
--- You can add as many variables as
--- you wish and access them by using
--- beautiful.variable in your rc.lua
---bg_widget    = #cc0000
-
-theme.titlebar_bg_normal = d_mask(blind_pat.mask.noise(0.02,"#AAAACC", blind_pat.sur.plain("#070A0C",default_height)))
-theme.titlebar_bg_focus  = d_mask(blind_pat.sur.flat_grad("#2A2A32",nil,default_height))
-
--- Define the image to load
-theme.titlebar_close_button_normal = path .."Icon/titlebar/close_normal_inactive.png"
-theme.titlebar_close_button_focus = path .."Icon/titlebar/close_focus_inactive.png"
-
-theme.titlebar_ontop_button_normal_inactive = path .."Icon/titlebar/ontop_normal_inactive.png"
-theme.titlebar_ontop_button_focus_inactive = path .."Icon/titlebar/ontop_focus_inactive.png"
-theme.titlebar_ontop_button_normal_active = path .."Icon/titlebar/ontop_normal_active.png"
-theme.titlebar_ontop_button_focus_active = path .."Icon/titlebar/ontop_focus_active.png"
-
-theme.titlebar_sticky_button_normal_inactive = path .."Icon/titlebar/sticky_normal_inactive.png"
-theme.titlebar_sticky_button_focus_inactive = path .."Icon/titlebar/sticky_focus_inactive.png"
-theme.titlebar_sticky_button_normal_active = path .."Icon/titlebar/sticky_normal_active.png"
-theme.titlebar_sticky_button_focus_active = path .."Icon/titlebar/sticky_focus_active.png"
-
-theme.titlebar_floating_button_normal_inactive = path .."Icon/titlebar/floating_normal_inactive.png"
-theme.titlebar_floating_button_focus_inactive = path .."Icon/titlebar/floating_focus_inactive.png"
-theme.titlebar_floating_button_normal_active = path .."Icon/titlebar/floating_normal_active.png"
-theme.titlebar_floating_button_focus_active = path .."Icon/titlebar/floating_focus_active.png"
-
-theme.titlebar_maximized_button_normal_inactive = path .."Icon/titlebar/maximized_normal_inactive.png"
-theme.titlebar_maximized_button_focus_inactive = path .."Icon/titlebar/maximized_focus_inactive.png"
-theme.titlebar_maximized_button_normal_active = path .."Icon/titlebar/maximized_normal_active.png"
-theme.titlebar_maximized_button_focus_active = path .."Icon/titlebar/maximized_focus_active.png"
-
-theme.titlebar_resize = path .."Icon/titlebar/resize.png"
-theme.titlebar_tag    = path .."Icon/titlebar/tag.png"
-
--- theme.titlebar_bg_focus = theme.bg_normal
-
-theme.titlebar_title_align = "left"
-theme.titlebar_height = 14
-
-
-------------------------------------------------------------------------------------------------------
---                                                                                                  --
---                                             LAYOUTS                                              --
---                                                                                                  --
-------------------------------------------------------------------------------------------------------
-
--- You can use your own layout icons like this:
-theme.layout_fairh           = path .."Icon/layouts/fairh.png"
-theme.layout_fairv           = path .."Icon/layouts/fairv.png"
-theme.layout_floating        = path .."Icon/layouts/floating.png"
-theme.layout_magnifier       = path .."Icon/layouts/magnifier.png"
-theme.layout_max             = path .."Icon/layouts/max.png"
-theme.layout_fullscreen      = path .."Icon/layouts/fullscreen.png"
-theme.layout_tilebottom      = path .."Icon/layouts/tilebottom.png"
-theme.layout_tileleft        = path .."Icon/layouts/tileleft.png"
-theme.layout_tile            = path .."Icon/layouts/tile.png"
-theme.layout_tiletop         = path .."Icon/layouts/tiletop.png"
-theme.layout_spiral          = path .."Icon/layouts/spiral.png"
-theme.layout_spiraldwindle   = path .."Icon/layouts/spiral_d.png"
-
-theme.layout_fairh_s         = path .."Icon/layouts_small/fairh.png"
-theme.layout_fairv_s         = path .."Icon/layouts_small/fairv.png"
-theme.layout_floating_s      = path .."Icon/layouts_small/floating.png"
-theme.layout_magnifier_s     = path .."Icon/layouts_small/magnifier.png"
-theme.layout_max_s           = path .."Icon/layouts_small/max.png"
-theme.layout_fullscreen_s    = path .."Icon/layouts_small/fullscreen.png"
-theme.layout_tilebottom_s    = path .."Icon/layouts_small/tilebottom.png"
-theme.layout_tileleft_s      = path .."Icon/layouts_small/tileleft.png"
-theme.layout_tile_s          = path .."Icon/layouts_small/tile.png"
-theme.layout_tiletop_s       = path .."Icon/layouts_small/tiletop.png"
-theme.layout_spiral_s        = path .."Icon/layouts_small/spiral.png"
-theme.layout_spiraldwindle_s = path .."Icon/layouts_small/spiral_d.png"
+-- Layouts
+loadfile(theme.path .."bits/layout.lua")(theme,path)
 
 wibox_w.textbox._draw = wibox_w.textbox.draw
 wibox_w.textbox.draw = function(self,w, cr, width, height,args)
