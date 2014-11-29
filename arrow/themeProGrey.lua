@@ -74,12 +74,6 @@ theme.border_marked  = "#91231c"
 theme.enable_glow    = true
 theme.glow_color     = "#171717"
 
-theme.tasklist_floating_icon       = path .."Icon/titlebar/floating.png"
-theme.tasklist_ontop_icon          = path .."Icon/titlebar/ontop.png"
-theme.tasklist_sticky_icon         = path .."Icon/titlebar/sticky.png"
-theme.tasklist_floating_focus_icon = path .."Icon/titlebar/floating_focus.png"
-theme.tasklist_ontop_focus_icon    = path .."Icon/titlebar/ontop_focus.png"
-theme.tasklist_sticky_focus_icon   = path .."Icon/titlebar/sticky_focus.png"
 theme.tasklist_plain_task_name     = true
 theme.tasklist_icon_transformation = function(image,data,item)
     if not item._state_transform_init then
@@ -210,45 +204,9 @@ wibox_w.textbox.fit = function(...)
     return w+3,h
 end
 wibox_w.textbox._draw = wibox_w.textbox.draw
-wibox_w.textbox.draw = function(self,w, cr, width, height,args)
-    --Create the cache
-    if not self.cache then
-        self.cache = {}
-        self.cached_text = self._layout.text
-        self:connect_signal("widget::updated",function()
-            if self._layout.text ~= self.cached_text then
-                self.cache = {}
-                self.cached_text = self._layout.text
-            end
-        end)
-    end
 
-    local cached = self.cache[(width+(10000*height))..self._layout.text]
-    if cached then
-        -- Use the cache
-        cr:set_source_surface(cached)
-        cr:paint()
-        return
-    end
-
-    --Init the textbox layout
-    self._layout.width = pango.units_from_double(width)
-    self._layout.height = pango.units_from_double(height)
-    local ink, logical = self._layout:get_pixel_extents()
-
-    --Draw in the cache
-    local img  = cairo.ImageSurface.create(cairo.Format.ARGB32, width, height)--target:create_similar(target:get_content(),width,height) 
-    local cr2 = cairo.Context(img)
-    cr2:set_source(cr:get_source())
-    cr2:update_layout(self._layout)
-    local y = (height-logical.height)/2 - ink.y/4
-    themeutils.draw_text(cr2,self._layout,0,y,theme.enable_glow or false,theme.glow_color,1,y+1)
-    self.cache[width+(10000*height)..self._layout.text] = img
-
-    --Use the cache
-    cr:set_source_surface(img)
-    cr:paint()
-end
+-- Textbox shadow
+loadfile(theme.path .."bits/textbox/shadow.lua")(theme,path)
 
 require( "chopped.arrow" )
 

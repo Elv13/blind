@@ -3,11 +3,16 @@ local surface    = require( "gears.surface"  )
 local themeutils = require( "blind.common.drawing"    )
 local blind      = require( "blind"          )
 local radical    = require( "radical"        )
+local blind_pat  = require( "blind.common.pattern" )
 local debug      = debug
 
 local path = debug.getinfo(1,"S").source:gsub("theme.*",""):gsub("@","")
 
 local theme = blind.theme
+
+local function d_mask(img,cr)
+    return blind_pat.to_pattern(img,cr)
+end
 
 ------------------------------------------------------------------------------------------------------
 --                                                                                                  --
@@ -15,11 +20,9 @@ local theme = blind.theme
 --                                                                                                  --
 ------------------------------------------------------------------------------------------------------
 
-theme.default_height = 20
--- theme.font           = "ohsnap 8"
+local default_height = 18
+theme.default_height = default_height
 theme.font           = "Sans DemiBold 8"
--- theme.font           = "-*-Terminus sans medium-r-normal--*-30-*-*-*-*-iso10646-1"
--- theme.font           = "Terminus 8 bold"
 theme.path           = path
 
 theme.bg = blind {
@@ -28,18 +31,18 @@ theme.bg = blind {
     urgent      = "#5B0000",
     minimize    = "#040A1A",
     highlight   = "#0E2051",
-    alternate   = "#101010",
-    allinone    = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#1D4164" }, { 1, "#0D2144" }}}
+    alternate   = "#18191B",
+    allinone    = "#0F2650"
 }
 
 theme.fg = blind {
-    normal   = "#6DA1D4",
+    normal   = "#4197D4",
     focus    = "#ABCCEA",
     urgent   = "#FF7777",
     minimize = "#1577D3",
 }
 
-theme.bg_systray     = theme.fg_normal
+theme.bg_systray     = "#1590D7"
 
 
 theme.button_bg_normal            = color.create_png_pattern(path .."Icon/bg/menu_bg_scifi.png"       )
@@ -53,7 +56,7 @@ theme.border_width   = "0"
 theme.border_normal  = "#1F1F1F"
 theme.border_focus   = "#535d6c"
 theme.border_marked  = "#91231c"
-theme.enable_glow    = flase
+theme.enable_glow    = false
 theme.glow_color     = "#105A8B"
 
 theme.alttab_icon_transformation = function(image,data,item)
@@ -61,8 +64,8 @@ theme.alttab_icon_transformation = function(image,data,item)
     return surface.tint(surface(image),color(theme.fg_normal),theme.default_height,theme.default_height)
 end
 
-theme.icon_grad        = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#8AC2D5" }, { 1, "#3D619C" }}}
-theme.icon_mask        = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#8AC2D5" }, { 1, "#3D619C" }}}
+theme.icon_grad        = "#1590D7"
+theme.icon_mask        = "#2A72A5"
 -- theme.icon_grad        = "#14617A"
 -- theme.icon_mask        = "#2EACDA"
 theme.icon_grad_invert = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#000000" }, { 1, "#112543" }}}
@@ -82,32 +85,29 @@ theme.bottom_menu_item_style = radical.item.style.slice_prefix
 theme.taglist = blind {
 
     bg = blind {
-        unused    = "#ffffff",
-        empty     = "#111111",
-        hover     = color.create_png_pattern(path .."Icon/bg/menu_bg_focus_scifi.png" ),
-        selected  = color.create_png_pattern(path .."Icon/bg/menu_bg_selected_scifi.png"),
-        cloned    = color.create_png_pattern(path .."Icon/bg/used_bg_green2.png"),
-        used      = color.create_png_pattern(path .."Icon/bg/selected_bg_scifi_focus.png"),
-        urgent    = color.create_png_pattern(path .."Icon/bg/urgent_bg.png"),
-        changed   = color.create_png_pattern(path .."Icon/bg/selected_bg_scifi_changed.png"),
-        highlight = "#bbbb00",
+        hover     = "#91D1FF",
+        selected  = "#00A6FF",
+        used      = "#123995",
+        urgent    = "#ff0000",
+        changed   = "#95127D",
+--         empty     = d_mask(blind_pat.sur.flat_grad("#090B10","#181E39",default_height)),
+        highlight = "#bbbb00"
     },
 
     fg = blind {
         selected  = "#ffffff",
-        cloned    = "#00bb00",
-        used      = "#7EA5E3",
+--         used      = "#7EA5E3",
         urgent    = "#FF7777",
         changed   = "#B78FEE",
         highlight = "#000000",
-        prefix    = "#ffffff",
+        prefix    = theme.bg_normal,
     },
 
     default = blind {
         item_margins = {
-            LEFT   = 2,
-            RIGHT  = 8,
-            TOP    = 0,
+            LEFT   = 3,
+            RIGHT  = 4,
+            TOP    = 2,
             BOTTOM = 6,
         },
         margins = {
@@ -118,27 +118,25 @@ theme.taglist = blind {
         },
     },
 
-    default_icon = path .."Icon/tags/other.png",
-    spacing      = 4,
+--     default_icon = path .."Icon/tags/other.png",
+    disable_icon  = true,
+    disable_index = true,
+    spacing      = 2,
     item_style   = radical.item.style.holo,
-    icon_transformation = function(image,data,item)
-        return color.apply_mask(image,color("#8186C3"))
-    end
+--     icon_transformation = function(image,data,item)
+--         return color.apply_mask(image,color("#8186C3"))
+--     end
 }
 
 theme.tasklist = blind {
     item_style              = radical.item.style.holo_top,
 
     bg = blind {
-        urgent         = color.create_png_pattern(path .."Icon/bg/urgent_bg.png"),
-        hover          = color.create_png_pattern(path .."Icon/bg/menu_bg_focus_scifi.png" ),
-        focus          = color.create_png_pattern(path .."Icon/bg/selected_bg_scifi_focus.png"),
-        image_normal   = function(wdg,m,t,objects) return arrow.task.gen_task_bg(wdg,m,t,objects,nil)     end,
-        image_focus    = function(wdg,m,t,objects) return arrow.task.gen_task_bg(wdg,m,t,objects,theme.taglist_bg_image_selected)     end,
-        image_urgent   = function(wdg,m,t,objects) return arrow.task.gen_task_bg(wdg,m,t,objects,theme.taglist_bg_image_urgent)     end,
-        image_minimize = function(wdg,m,t,objects) return arrow.task.gen_task_bg(wdg,m,t,objects,nil)     end,
+        urgent         = "#D30000",
+        hover          = "#91D1FF",
+        focus          = "#00A6FF",
         image_selected = path .."Icon/bg/selected_bg_scifi.png",
-        minimized      = "#10002C",
+        minimized      = "#200058",
     },
 
     underlay_bg = blind {
@@ -152,7 +150,7 @@ theme.tasklist = blind {
             LEFT   = 8,
             RIGHT  = 4,
             TOP    = 6,
-            BOTTOM = 0,
+            BOTTOM = 2,
         },
         margins = {
             LEFT   = 7,
@@ -162,25 +160,12 @@ theme.tasklist = blind {
         },
     },
 
-    fg_minimized            = "#985FEE",
-    default_icon            = path .."Icon/tags/other.png",
-    spacing                 = 4,
-    disable_icon            = true,
-    plain_task_name         = true,
-    icon_transformation     = function(image,data,item)
-        if not item._state_transform_init then
-            item:connect_signal("state::changed",function()
-                if item._original_icon then
-                    item:set_icon(item._original_icon)
-                end
-            end)
-            item._state_transform_init = true
-        end
-        local state = item.state or {}
-        local current_state = state._current_key or nil
-        local state_name = radical.base.colors_by_id[current_state] or "normal"
-        return surface.tint(image,color(state_name == "normal" and theme.fg_normal or item["fg_"..state_name]  --[[theme.fg_normal]]),theme.default_height,theme.default_height)
-    end
+    fg_minimized        = "#985FEE",
+    default_icon        = path .."Icon/tags/other.png",
+    spacing             = 4,
+    disable_icon        = true,
+    plain_task_name     = true,
+    icon_transformation = loadfile(theme.path .."bits/icon_transformation/state.lua")(theme,path)
 }
 
 
@@ -190,18 +175,13 @@ theme.tasklist = blind {
 --                                                                                                  --
 ------------------------------------------------------------------------------------------------------
 
-
--- Variables set for theming menu
--- menu_[bg|fg]_[normal|focus]
--- menu_[border_color|border_width]
--- theme.menu_scrollmenu_down_icon = path .."Icon/tags/arrow_down.png"
--- theme.menu_scrollmenu_up_icon   = path .."Icon/tags/arrow_up.png"
 theme.border_width              = 1
 theme.border_color              = theme.fg_normal
 theme.awesome_icon              = path .."Icon/awesome2.png"
-theme.bg_dock                   = color.create_png_pattern(path .."Icon/bg/bg_dock.png"             )
+theme.bg_dock                   = "#000000"
 theme.fg_dock_1                 = "#1889F2"
 theme.fg_dock_2                 = "#0A3E6E"
+theme.dock_corner_radius        = 4
 
 theme.draw_underlay = themeutils.draw_underlay
 
@@ -212,12 +192,17 @@ theme.menu = blind {
     border_width         = 2,
     opacity              = 0.9,
     fg_normal            = "#ffffff",
+    corner_radius        = 5,
+    border_color         = "#252525",
+    outline_color        = "#B7B7B7",
+    table_bg_header      = "#999999",
+    checkbox_style       = "holo",
 
     bg = blind {
-        focus     = color.create_png_pattern(path .."Icon/bg/menu_bg_focus_scifi.png" ),
-        header    = color.create_png_pattern(path .."Icon/bg/menu_bg_header_scifi.png"),
-        normal    = color.create_png_pattern(path .."Icon/bg/menu_bg_scifi.png"       ),
-        highlight = color.create_png_pattern(path .."Icon/bg/menu_bg_highlight.png"   ),
+        focus     = "#14617A",
+        header    = "#1A1A1A",
+        normal    = "#1A1A1A",
+        highlight = "#252525",
     }
 }
 
@@ -229,10 +214,26 @@ theme.menu = blind {
 ------------------------------------------------------------------------------------------------------
 
 -- Titlebar
-loadfile(theme.path .."bits/titlebar.lua")(theme,path)
+loadfile(theme.path .."bits/titlebar_minde.lua")(theme,path)
+theme.titlebar = blind {
+    bg_normal = "#000000",
+    bg_focus  = "#184E99",
+    fg_focus  = "#ffffff",
+}
 
 -- Layouts
 loadfile(theme.path .."bits/layout.lua")(theme,path)
+
+
+
+------------------------------------------------------------------------------------------------------
+--                                                                                                  --
+--                                               DOCK                                               --
+--                                                                                                  --
+------------------------------------------------------------------------------------------------------
+
+theme.dock_icon_transformation = function(image,data,item) return surface.outline( surface(image), theme.icon_grad) end
+
 
 require( "chopped.slice" )
 
