@@ -28,6 +28,10 @@ local function d_mask(img,cr)
     return blind_pat.to_pattern(blind_pat.mask.ThreeD(img,cr))
 end
 
+local function d_resize(img,cr)
+    return blind_pat.mask.resize(default_height,default_height, img,cr)
+end
+
 theme.path = path
 
 -- Background
@@ -38,23 +42,24 @@ theme.bg = blind {
     minimize    = "#040A1A",
     highlight   = "#0E2051",
     alternate   = "#081B37",
-    allinone    = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#1D4164" }, { 1, "#0D2144" }}},
+    allinone    = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#7C6900" }, { 1, "#635400" }}},
 }
 
 -- Wibar background
 local bargrad = { type = "linear", from = { 0, 0 }, to = { 0, 16 }, stops = { { 0, "#000000" }, { 1, "#040405" }}}
 theme.bar_bg = blind {
-    alternate = d_mask(blind_pat.mask.noise(0.04,"#AAAACC", blind_pat.sur.plain("#081B37",default_height))),
-    normal    = d_mask(blind_pat.sur.flat_grad(bargrad,"#1C1C22",default_height)),
+    alternate = d_mask(d_resize(blind_pat.sur.carbon(2,"#242424","#181818"))),
+    normal    = d_mask(d_resize(blind_pat.sur.carbon(2,"#1A1A1A","#0C0C0C"))),
     buttons   = d_mask(blind_pat.sur.flat_grad("#00091A","#04204F",default_height)),
 }
 
 -- Forground
 theme.fg = blind {
-    normal   = "#6DA1D4",
+    normal   = "#C2D3E3",
     focus    = "#ABCCEA",
     urgent   = "#FF7777",
     minimize = "#1577D3",
+    allinone    = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#FFD900" }, { 1, "#FFD900" }}},
 }
 
 -- Other
@@ -62,7 +67,7 @@ theme.awesome_icon         = path .."Icon/awesome2.png"
 theme.systray_icon_spacing = 4
 theme.button_bg_normal     = color.create_png_pattern(path .."Icon/bg/menu_bg_scifi.png"       )
 theme.enable_glow          = true
-theme.glow_color           = "#105A8B"
+theme.glow_color           = "#0B0C0E"
 theme.naughty_bg           = theme.bg_alternate
 theme.naughty_border_color = theme.fg_normal
 theme.bg_dock              = color.create_png_pattern(path .."Icon/bg/bg_dock.png"             )
@@ -84,8 +89,8 @@ theme.alttab_icon_transformation = function(image,data,item)
     return surface.tint(surface(image),color(theme.fg_normal),theme.default_height,theme.default_height)
 end
 
-theme.icon_grad        = d_mask(blind_pat.mask.noise(0.4,"#777788", blind_pat.sur.plain("#507289",default_height)))
-theme.icon_mask        = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#8AC2D5" }, { 1, "#3D619C" }}}
+theme.icon_grad        = d_mask(d_resize(blind_pat.sur.carbon(2,"#282828","#1B1B1B")))
+theme.icon_mask        = { type = "linear", from = { 0, 0 }, to = { 0, 16 }, stops = { { 0, "#C9A803" }, { 1, "#524401" }}}
 theme.icon_grad_invert = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#000000" }, { 1, "#112543" }}}
 
 
@@ -94,22 +99,24 @@ theme.taglist = blind {
     bg = blind {
         hover     = d_mask(blind_pat.sur.thick_stripe("#19324E","#132946",14,default_height,true)),
         selected  = d_mask(blind_pat.sur.thick_stripe("#0D3685","#05297F",4 ,default_height,true)),
-        used      = d_mask(blind_pat.sur.flat_grad("#00143B","#052F77",default_height)),
+        used      = d_mask(d_resize(blind_pat.sur.carbon(2,"#A07D08","#906206"))),
         urgent    = d_mask(blind_pat.sur.flat_grad("#5B0000","#300000",default_height)),
         changed   = d_mask(blind_pat.sur.flat_grad("#4D004D","#210021",default_height)),
-        empty     = d_mask(blind_pat.sur.flat_grad("#090B10","#181E39",default_height)),
+        empty     = d_mask(d_resize(blind_pat.sur.carbon(2,"#1A1A1A","#0C0C0C"))),
         highlight = "#bbbb00"
     },
     fg = blind {
+        empty     = "#D6B600",
         selected  = "#ffffff",
-        used      = "#7EA5E3",
+        used      = "#656565",
         urgent    = "#FF7777",
         changed   = "#B78FEE",
         highlight = "#000000",
-        prefix    = theme.bg_normal,
+        prefix    = "#9C8531",
     },
     custom_color = function (...) d_mask(blind_pat.sur.flat_grad(...)) end,
     default_icon       = path .."Icon/tags/other.png",
+    icon_transformation     = function(img) return color.apply_mask(img,theme.icon_mask) end
 }
 theme.taglist_bg                 = d_mask(blind_pat.sur.plain("#070A0C",default_height))
 
@@ -165,7 +172,7 @@ theme.titlebar = blind {
 loadfile(theme.path .."bits/layout.lua")(theme,path)
 
 -- Textbox glow
-loadfile(theme.path .."bits/textbox/glow.lua")(theme,path)
+loadfile(theme.path .."bits/textbox/shadow.lua")(theme,path)
 
 -- The separator theme
 require( "chopped.arrow" )
