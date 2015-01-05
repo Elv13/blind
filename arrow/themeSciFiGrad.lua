@@ -171,6 +171,6 @@ loadfile(theme.path .."bits/textbox/glow.lua")(theme,path)
 require( "chopped.arrow" )
 
 -- Add round corner to floating clients
-require("blind.arrow.bits.client_shape")
+loadfile(theme.path .."bits/client_shape.lua")(3)
 
 return theme

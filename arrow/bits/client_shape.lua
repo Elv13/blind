@@ -1,12 +1,21 @@
+local radius,bot,all= ...
 local capi      = {client=client}
 local shape     = require("blind.common.shape" )
 local beautiful = require("beautiful"          )
 local cairo     = require( "lgi"               ).cairo
 local client    = require( "awful.client"      )
-local cshape    = require( "awful.client.shape")
+local ret,cshape    = pcall(require, "awful.client.shape")
 local surface   = require("gears.surface")
 
+-- Cshape is not available in 3.5.*
+if not cshape or ret == false then return end
+
 local active = setmetatable({},{__mode="k"})
+
+radius = radius or 5
+
+fct = bot and shape.draw_round_rect or shape.draw_round_rect2
+print("foo",bot,fct,shape.draw_round_rect)
 
 local function create(c)
     local geo = c:geometry()
@@ -23,7 +32,7 @@ local function create(c)
 
     cr:set_operator(cairo.Operator.SOURCE)
     cr:set_source_rgba(1,1,1,1)
-    shape.draw_round_rect2(cr,0,0,width+2*border,height+2*border,10,10,5,5)
+    fct(cr,0,0,width+2*border,height+2*border,2*radius,2*radius,radius,radius)
     cr:fill()
 
     c.shape_bounding = img._native
@@ -38,7 +47,7 @@ local function create(c)
     cr:set_operator(cairo.Operator.SOURCE)
     cr:set_source_rgba(1,1,1,1)
 
-    shape.draw_round_rect2(cr,0,0,width,height,10,10,5,5)
+    fct(cr,0,0,width,height,2*radius,2*radius,radius,radius)
     cr:fill()
     c.shape_clip = img._native
     img:finish()
@@ -55,7 +64,7 @@ capi.client.connect_signal("property::floating",function(c)
 end)
 
 capi.client.connect_signal("property::width",function(c)
-    if active[c] then
+    if all or active[c] then
         create(c)
     else
         cshape.update.all(c)
@@ -63,7 +72,7 @@ capi.client.connect_signal("property::width",function(c)
 end)
 
 capi.client.connect_signal("property::height",function(c)
-    if active[c] then
+    if all or active[c] then
         create(c)
     else
         cshape.update.all(c)
