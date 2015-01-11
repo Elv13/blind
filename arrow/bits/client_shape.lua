@@ -15,7 +15,6 @@ local active = setmetatable({},{__mode="k"})
 radius = radius or 5
 
 fct = bot and shape.draw_round_rect or shape.draw_round_rect2
-print("foo",bot,fct,shape.draw_round_rect)
 
 local function create(c)
     local geo = c:geometry()

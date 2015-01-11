@@ -39,7 +39,8 @@ theme.bg = blind {
     minimize    = "#040A1A",
     highlight   = "#0E2051",
     alternate   = "#081B37",
-    allinone    = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#1D4164" }, { 1, "#0D2144" }}},
+    underlay    = "#191A1E",
+    allinone    = { type = "linear", from = { 0, 0 }, to = { 0, 20 }, stops = { { 0, "#888888" }, { 1, "#4f4f4f" }}},
 }
 
 theme.allinone_margins = 4
@@ -58,6 +59,7 @@ theme.fg = blind {
     focus    = "#ABCCEA",
     urgent   = "#FF7777",
     minimize = "#1577D3",
+    allinone = "#ADADAD",
 }
 
 -- Other
@@ -68,11 +70,13 @@ theme.enable_glow          = true
 theme.glow_color           = "#00000011"
 theme.naughty_bg           = theme.bg_alternate
 theme.naughty_border_color = theme.fg_normal
-theme.bg_dock              = color.create_png_pattern(path .."Icon/bg/bg_dock.png"             )
-theme.fg_dock_1            = "#1889F2"
-theme.fg_dock_2            = "#0A3E6E"
+theme.bg_dock              = blind_pat.to_pattern(blind_pat.mask.noise(0.06,"#AAAACC", blind_pat.sur.plain("#2F363B",default_height)))
+theme.fg_dock_1            = "#DDDDDD"
+theme.fg_dock_2            = "#DDDDDD"
+theme.dock_spacing         = 2
 theme.bg_systray           = theme.fg_normal
 theme.bg_resize_handler    = "#aaaaff55"
+theme.allinone_icon        = "#ADADAD99"
 
 -- Border
 theme.border = blind {
@@ -117,6 +121,16 @@ local used_bg = { type = "linear", from = { 0, 0 }, to = { 0, taglist_height },
     {1,"#202428ff"},
 }}
 
+local selected_bg = { type = "linear", from = { 0, 0 }, to = { 0, taglist_height },
+    stops = {
+    { 0, "#252a2fff" }, 
+    { taglist_grad_px, "#252a2fff" },
+    { taglist_grad_px,"#1a1c20ff"},
+    {(taglist_height-1)*taglist_grad_px,"#313539ff"},
+    {(taglist_height-1)*taglist_grad_px,"#202428ff"},
+    {1,"#202428ff"},
+}}
+
 -- Taglist
 theme.taglist = blind {
     bg = blind {
@@ -132,15 +146,7 @@ theme.taglist = blind {
                 {1,"#202428ff"},
             }},
 
-        selected  = { type = "linear", from = { 0, 0 }, to = { 0, taglist_height },
-            stops = {
-                { 0, "#252a2fff" }, 
-                { taglist_grad_px, "#252a2fff" },
-                { taglist_grad_px,"#1a1c20ff"},
-                {(taglist_height-1)*taglist_grad_px,"#313539ff"},
-                {(taglist_height-1)*taglist_grad_px,"#202428ff"},
-                {1,"#202428ff"},
-            }},
+        selected  = selected_bg,
 
         used      = used_bg,
         urgent    = used_bg,
@@ -249,7 +255,7 @@ theme.tasklist = blind {
     default_icon            = path .."Icon/tags/other.png",
     bg                      = "#00000000",
     icon_transformation     = loadfile(theme.path .."bits/icon_transformation/state.lua")(theme,path),
-    item_style              = radical.item.style.rounded,
+    item_style              = radical.item.style.rounded_shadow,
     spacing                 = 6,
 }
 
@@ -275,19 +281,25 @@ theme.menu = blind {
     border_width = 2,
     opacity      = 0.9,
     fg_normal    = "#ffffff",
-    bg_focus     = color.create_png_pattern(path .."Icon/bg/menu_bg_focus_scifi.png" ),
+    fg_focus     = "#148bf5ff",
+    bg_focus     = selected_bg,
     bg_header    = color.create_png_pattern(path .."Icon/bg/menu_bg_header_scifi.png"),
-    bg_normal    = color.create_png_pattern(path .."Icon/bg/menu_bg_scifi.png"       ),
+    bg_normal    = blind_pat.to_pattern(blind_pat.mask.noise(0.06,"#AAAACC", blind_pat.sur.plain("#2F363B",default_height))),
     bg_highlight = color.create_png_pattern(path .."Icon/bg/menu_bg_highlight.png"   ),
-    border_color = theme.fg_normal,
+    item_style   = radical.item.style.classic,
+    border_color = "#828282",
+    item_border_color = "#21262A",
 }
 
 -- theme.bottom_menu_style      = radical.style.grouped_3d
 theme.bottom_menu_item_style = radical.item.style.rounded
 theme.bottom_menu_spacing    = 6
 theme.bottom_menu_bg = "#00000000"
-theme.botton_menu_item_border_color = "#0000ff"
-
+theme.bottom_menu_item_border_color = color{ type = "linear", from = { 0, 0 }, to = { 0, default_height }, stops = { { 0, "#5F6B76" }, { 1, "#30363C" }}}
+theme.bottom_menu_icon_transformation = function(img,data,item)
+    local col = color(theme.taglist_fg_empty)
+    return pixmap(img) : colorize(col) : resize_center(2,taglist_height-6,taglist_height-6) : shadow() : to_img()
+end
 -- theme.bottom_menu_default_item_margins = {
 --     LEFT   = 2,
 --     RIGHT  = 17,
@@ -295,10 +307,10 @@ theme.botton_menu_item_border_color = "#0000ff"
 --     BOTTOM = 4,
 -- }
 theme.bottom_menu_default_margins = {
-    LEFT   = 6,
+    LEFT   = 7,
     RIGHT  = 17,
-    TOP    = 3,
-    BOTTOM = 3,
+    TOP    = 2,
+    BOTTOM = 2,
 }
 
 -- Shorter
@@ -312,22 +324,24 @@ theme.shorter = blind {
 
 -- Titlebar
 theme.titlebar = blind {
-    bg_normal = d_mask(blind_pat.mask.noise(0.02,"#AAAACC", blind_pat.sur.plain("#070A0C",default_height))),
-    bg_focus  = d_mask(blind_pat.sur.flat_grad("#2A2A32",nil,default_height)),
+    bg_focus  = theme.bar_bg_normal,
     height    = 18,
     bg = blind {
-        inactive = "#ff0000",
-        active   = color{ type = "linear", from = { 0, 0 }, to = { 0, 12 }, stops = { { 0, "#5F6A76" }, { 1, "#3C444B" }}},
+        inactive = color{ type = "linear", from = { 0, 0 }, to = { 0, 12 }, stops = { { 0, "#5F6A76" }, { 1, "#3C444B" }}},
+        active   = "#ff0000",
         hover    = "#0000ff",
         pressed  = "#ffff00",
     },
     border_color = blind {
-        inactive = "#ff00ff",
-        active   = color{ type = "linear", from = { 0, 0 }, to = { 0, default_height }, stops = { { 0, "#3B434A" }, { 1, "#282d32" }}},
+        inactive = color{ type = "linear", from = { 0, 0 }, to = { 0, default_height }, stops = { { 0, "#3B434A" }, { 1, "#282d32" }}},
+        active   = "#ff00ff",
         hover    = "#ff00ff",
         pressed  = "#ffffff",
-    }
+    },
+    bg_underlay = { type = "linear", from = { 0, 0 }, to = { 0, default_height }, stops = { { 0, "#3F474E" }, { 1, "#181B1E" }}},
 }
+
+theme.separator_color = "#49535B"
 
 loadfile(theme.path .."bits/titlebar_square.lua")(theme,path)
 
@@ -338,7 +352,7 @@ loadfile(theme.path .."bits/layout.lua")(theme,path)
 loadfile(theme.path .."bits/textbox/shadow.lua")(theme,path)
 
 -- The separator theme
-require( "chopped.arrow" )
+require( "chopped.circle" )
 
 -- Add round corner to floating clients
 loadfile(theme.path .."bits/client_shape.lua")(3,true,true)
